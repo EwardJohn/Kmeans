@@ -1,6 +1,20 @@
 import numpy as np 
 import matplotlib.pyplot as plt 
 
+
+def Json2txt(inpath,outpath):
+    with open(inpath,'r',encoding='utf-8') as f:
+        data = json.load(f)
+        # x = random.randint(0,70000)
+        ann = data['annotations']
+        result = random.sample(ann,4000)
+        coord = list([round(i['bbox'][0],2),round(i['bbox'][1],2)] for i in result)
+        with open(outpath,'w',encoding='utf-8') as w:
+            for i in coord:
+                w.write(str(i[0])+'   '+str(i[1])+'\n')
+        w.close()
+    f.close()
+
 def load_data(filename):
     return np.loadtxt(filename)
 
@@ -9,13 +23,15 @@ def euclidian(x,y):
     return np.linalg.norm(x-y)
 
 
-def Draw(centroids,min_position):
-    colors = ['r','g']
+def Draw(k,centroids,min_position):
+    # colors = [plt.cm.tab10(i/float(k-1)) for i in range(k)]
+    colors = ['r','g','c','y']
     fig, ax = plt.subplots() 
     dataset = load_data('./k-means_clustering/data2.txt')
+    print(min_position)
 #------------------------------------------------------------------------------------------
 #画出几组不同的点
-    for index in range(dataset.shape[1]):
+    for index in range(k):
         mid_position = [i for i in range(len(min_position)) if min_position[i] == index]
         for ele in mid_position:
             ax.plot(dataset[ele][0],dataset[ele][1],(colors[index]+'o'))
@@ -57,6 +73,7 @@ def Kmeans(k, elision=0, distance='euclidian'):
             for numbers, element in enumerate(samples):
                 dist_list[numbers] = dist_method(instances,element)
             min_position[index,0] = np.argmin(dist_list)
+        
         tem_result = np.zeros((k, num_features))
 #-----------------------------------------------------------------------------------------
 #calculate the mean value of different groups and update the samples
@@ -72,8 +89,9 @@ def Kmeans(k, elision=0, distance='euclidian'):
 
 if __name__ == "__main__":
 
-    samples, centroids, min_position = Kmeans(2)
-    Draw(centroids, min_position)
+    Json2txt('./train.json','./data2.txt'')
+    samples, centroids, min_position = Kmeans(4)
+    Draw(4,centroids, min_position)
 
 
     
